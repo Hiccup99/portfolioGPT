@@ -1,8 +1,11 @@
+import { MOCK_PROFILES, type MockProfile } from '../data/mockLinkedIn'
+
 export interface LinkedInProfileData {
   name?: string
   headline?: string
   location?: string
   summary?: string
+  profile_picture_url?: string
   experience?: Array<{
     title: string
     company: string
@@ -28,6 +31,16 @@ export interface LinkedInProfileData {
   languages?: string[]
   recommendations_count?: number
   connections_count?: string
+  awards?: Array<{
+    name: string
+    organization?: string
+    date?: string
+    summary?: string
+  }>
+  recommendations?: Array<{
+    name: string
+    summary: string
+  }>
 }
 
 /**
@@ -63,6 +76,17 @@ function extractLinkedInUsername(input: string): string {
  * Fetch LinkedIn profile data using ScrapingDog API
  */
 export async function fetchLinkedInProfile(linkedinUrl: string): Promise<LinkedInProfileData> {
+  // Use mock data in development to avoid hitting the API
+  const useMock = import.meta.env.VITE_USE_MOCK_DATA === 'true'
+
+  if (useMock) {
+    const profileKey = (import.meta.env.VITE_MOCK_PROFILE || 'sidharth') as MockProfile
+    const mockData = MOCK_PROFILES[profileKey] || MOCK_PROFILES.sidharth
+    console.log(`Using mock LinkedIn data: ${profileKey}`)
+    await new Promise(resolve => setTimeout(resolve, 500)) // Simulate API delay
+    return transformScrapingDogResponse(mockData as Record<string, unknown>)
+  }
+
   const apiKey = import.meta.env.VITE_SCRAPINGDOG_API_KEY
 
   if (!apiKey) {
@@ -95,8 +119,11 @@ export async function fetchLinkedInProfile(linkedinUrl: string): Promise<LinkedI
 
   const data = await response.json()
 
+  // Handle array response (ScrapingDog sometimes returns an array)
+  const profileData = Array.isArray(data) ? data[0] : data
+
   // Transform ScrapingDog response to our format
-  return transformScrapingDogResponse(data)
+  return transformScrapingDogResponse(profileData)
 }
 
 /**
@@ -104,20 +131,25 @@ export async function fetchLinkedInProfile(linkedinUrl: string): Promise<LinkedI
  */
 function transformScrapingDogResponse(data: Record<string, unknown>): LinkedInProfileData {
   // ScrapingDog returns data in a specific format, map it to our interface
-  // The exact structure depends on ScrapingDog's response format
+  // Field names based on actual ScrapingDog response structure
 
   const profile: LinkedInProfileData = {
-    name: data.name as string || data.full_name as string,
+    // ScrapingDog uses "fullName" not "name"
+    name: data.fullName as string || data.name as string || data.full_name as string,
     headline: data.headline as string || data.title as string,
     location: data.location as string,
-    summary: data.summary as string || data.about as string,
+    // ScrapingDog uses "about" not "summary"
+    summary: data.about as string || data.summary as string,
+    // ScrapingDog uses "profile_photo"
+    profile_picture_url: data.profile_photo as string || data.profile_picture as string || data.profile_pic_url as string || data.avatar as string,
+    connections_count: data.connections as string,
   }
 
-  // Map experience
+  // Map experience - ScrapingDog uses "company_name" not "company"
   if (Array.isArray(data.experience)) {
     profile.experience = data.experience.map((exp: Record<string, unknown>) => ({
       title: exp.title as string || '',
-      company: exp.company as string || exp.company_name as string || '',
+      company: exp.company_name as string || exp.company as string || '',
       company_url: exp.company_url as string,
       location: exp.location as string,
       start_date: exp.start_date as string || exp.starts_at as string,
@@ -144,12 +176,39 @@ function transformScrapingDogResponse(data: Record<string, unknown>): LinkedInPr
     ).filter(Boolean)
   }
 
-  // Map certifications
-  if (Array.isArray(data.certifications)) {
-    profile.certifications = data.certifications.map((cert: Record<string, unknown>) => ({
-      name: cert.name as string || cert.title as string || '',
-      authority: cert.authority as string || cert.issuing_organization as string,
-      date: cert.date as string || cert.issue_date as string,
+  // Map certifications - ScrapingDog uses "certification" not "certifications"
+  const certifications = data.certification || data.certifications
+  if (Array.isArray(certifications)) {
+    profile.certifications = (certifications as Array<Record<string, unknown>>).map((cert) => ({
+      // ScrapingDog uses "certification" for the name field
+      name: cert.certification as string || cert.name as string || cert.title as string || '',
+      authority: cert.company_name as string || cert.authority as string || cert.issuing_organization as string,
+      date: cert.issue_date as string || cert.date as string,
+    }))
+  }
+
+  // Map languages
+  if (Array.isArray(data.languages)) {
+    profile.languages = (data.languages as Array<Record<string, unknown>>).map((lang) =>
+      typeof lang === 'string' ? lang : lang.name as string || ''
+    ).filter(Boolean)
+  }
+
+  // Map awards - ScrapingDog includes awards
+  if (Array.isArray(data.awards)) {
+    profile.awards = (data.awards as Array<Record<string, unknown>>).map((award) => ({
+      name: award.name as string || '',
+      organization: award.organization as string,
+      date: award.duration as string || award.date as string,
+      summary: award.summary as string,
+    }))
+  }
+
+  // Map recommendations - ScrapingDog includes recommendations
+  if (Array.isArray(data.recommendations)) {
+    profile.recommendations = (data.recommendations as Array<Record<string, unknown>>).map((rec) => ({
+      name: rec.name as string || '',
+      summary: rec.summary as string || '',
     }))
   }
 
@@ -216,6 +275,28 @@ export function linkedInProfileToText(profile: LinkedInProfileData): string {
     sections.push('\nCertifications:')
     profile.certifications.forEach((cert) => {
       sections.push(`- ${cert.name}${cert.authority ? ` (${cert.authority})` : ''}`)
+    })
+  }
+
+  if (profile.languages && profile.languages.length > 0) {
+    sections.push(`\nLanguages: ${profile.languages.join(', ')}`)
+  }
+
+  if (profile.awards && profile.awards.length > 0) {
+    sections.push('\nAwards & Recognition:')
+    profile.awards.forEach((award) => {
+      sections.push(`- ${award.name}${award.organization ? ` (${award.organization})` : ''}${award.date ? ` - ${award.date}` : ''}`)
+      if (award.summary) {
+        sections.push(`  ${award.summary}`)
+      }
+    })
+  }
+
+  if (profile.recommendations && profile.recommendations.length > 0) {
+    sections.push('\nRecommendations:')
+    profile.recommendations.forEach((rec, i) => {
+      sections.push(`\n${i + 1}. From ${rec.name}:`)
+      sections.push(`   "${rec.summary}"`)
     })
   }
 

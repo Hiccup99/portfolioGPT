@@ -1,5 +1,17 @@
-import { useState } from 'react'
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion'
+import { ArrowRight, Trash2, Image, Lock, Shield, Check } from 'lucide-react'
+import Footer from '../components/footer'
 
 const testimonials = [
   {
@@ -8,12 +20,12 @@ const testimonials = [
     text: "I was skeptical at first, but the portfolio it created captured my personality perfectly. Got 3 interview calls within a week!",
   },
   {
-    name: "Rahul Mehta",
+    name: "James Wilson",
     role: "Product Designer",
     text: "The AI understood my design background and created something visually stunning. Saved me hours of work.",
   },
   {
-    name: "Ananya Krishnan",
+    name: "Sarah Chen",
     role: "Data Scientist",
     text: "Clean, professional, and exactly what I needed. The pricing is unbeatable for this quality.",
   },
@@ -23,7 +35,7 @@ const testimonials = [
     text: "My LinkedIn was a mess. PortfolioGPT turned it into a compelling story. Absolutely worth it.",
   },
   {
-    name: "Sneha Reddy",
+    name: "Emily Rodriguez",
     role: "UX Researcher",
     text: "The attention to detail is incredible. It highlighted projects I forgot I even worked on!",
   },
@@ -31,21 +43,6 @@ const testimonials = [
     name: "Arjun Singh",
     role: "Full Stack Developer",
     text: "From resume to live website in under 10 minutes. This is the future of personal branding.",
-  },
-  {
-    name: "Meera Iyer",
-    role: "Business Analyst",
-    text: "I've tried other portfolio builders. None of them understood my career trajectory like this one did.",
-  },
-  {
-    name: "Karthik Nair",
-    role: "DevOps Engineer",
-    text: "Simple, fast, and effective. The website looks like I paid thousands for a custom design.",
-  },
-  {
-    name: "Divya Gupta",
-    role: "Content Strategist",
-    text: "The AI picked up on my writing style and reflected it throughout. It feels authentically me.",
   },
 ]
 
@@ -86,46 +83,40 @@ const faqs = [
 
 const privacyItems = [
   {
-    icon: (
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-      </svg>
-    ),
+    icon: <Trash2 className="w-5 h-5" />,
     title: "Delete when you want",
     desc: "You can delete your data any time. Or we do it for you automatically.",
   },
   {
-    icon: (
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-      </svg>
-    ),
+    icon: <Image className="w-5 h-5" />,
     title: "Your images, your headshots",
     desc: "Uploaded images are not used for any other purpose or training.",
   },
   {
-    icon: (
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-      </svg>
-    ),
+    icon: <Lock className="w-5 h-5" />,
     title: "Caring by not sharing",
     desc: "We don't share, sell, or advertise your data. Ever.",
   },
   {
-    icon: (
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-      </svg>
-    ),
+    icon: <Shield className="w-5 h-5" />,
     title: "Rock-solid security",
     desc: "All data encrypted in transit and stored only for the period required.",
   },
 ]
 
+const steps = [
+  { step: "1", title: "Link LinkedIn", desc: "Connect your profile", icon: "🔗" },
+  { step: "2", title: "Upload Resume", desc: "Drop your PDF", icon: "📄" },
+  { step: "3", title: "AI Magic", desc: "We create your site", icon: "✨" },
+  { step: "4", title: "Go Live!", desc: "Ready in minutes", icon: "🚀" },
+]
+
 export default function LandingPage() {
   const navigate = useNavigate()
-  const [openFaq, setOpenFaq] = useState<number | null>(null)
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
 
   const handleCTA = () => {
     navigate('/create')
@@ -136,14 +127,14 @@ export default function LandingPage() {
       {/* Navigation */}
       <nav className="border-b border-neutral-100 sticky top-0 bg-white/80 backdrop-blur-md z-50">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <span className="text-lg font-semibold text-black">PortfolioGPT</span>
-          <button
-            onClick={handleCTA}
-            className="group px-4 py-2 bg-black text-white text-sm font-medium rounded-lg hover:bg-neutral-800 transition-all duration-300 inline-flex items-center gap-2"
-          >
+          <span className="text-lg font-bold tracking-tight">
+            <span className="text-black">Portfolio</span>
+            <span className="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">GPT</span>
+          </span>
+          <Button onClick={handleCTA} className="group">
             Get Started
-            <span className="group-hover:translate-x-1 transition-transform duration-300">→</span>
-          </button>
+            <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </Button>
         </div>
       </nav>
 
@@ -158,17 +149,14 @@ export default function LandingPage() {
             <p className="text-lg text-neutral-600 mb-8">
               Pay only after you love your website
             </p>
-            <button
-              onClick={handleCTA}
-              className="group px-8 py-4 bg-black text-white font-medium rounded-lg hover:bg-neutral-800 transition-all duration-300 inline-flex items-center gap-2 hover:shadow-xl hover:-translate-y-0.5"
-            >
+            <Button onClick={handleCTA} size="lg" className="group">
               Create your own website
-              <span className="group-hover:translate-x-1 transition-transform duration-300">→</span>
-            </button>
+              <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </Button>
           </div>
           <div className="animate-fade-in-up animation-delay-200">
             <img
-              src="/stock.png"
+              src="/stock.avif"
               alt="Portfolio preview"
               className="w-full rounded-2xl shadow-2xl hover:shadow-3xl transition-shadow duration-500"
             />
@@ -196,47 +184,53 @@ export default function LandingPage() {
           </p>
           <div className="grid md:grid-cols-3 gap-6">
             {testimonials.map((t, i) => (
-              <div
+              <Card
                 key={i}
-                className="group bg-white p-6 rounded-xl border border-neutral-200 hover:border-blue-200 hover:shadow-lg hover:shadow-blue-50 transition-all duration-300 hover:-translate-y-1"
-                style={{ animationDelay: `${i * 100}ms` }}
+                className="group hover:border-blue-200 hover:shadow-lg hover:shadow-blue-50 transition-all duration-300 hover:-translate-y-1"
               >
-                <p className="text-neutral-600 mb-4 group-hover:text-neutral-800 transition-colors">"{t.text}"</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-cyan-400 flex items-center justify-center text-white font-medium">
-                    {t.name.charAt(0)}
+                <CardContent className="p-6">
+                  <div className="flex gap-0.5 mb-3">
+                    {[...Array(5)].map((_, idx) => (
+                      <svg key={idx} className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    ))}
                   </div>
-                  <div>
-                    <p className="font-medium text-black">{t.name}</p>
-                    <p className="text-sm text-neutral-500">{t.role}</p>
+                  <p className="text-neutral-600 mb-4 group-hover:text-neutral-800 transition-colors">"{t.text}"</p>
+                  <div className="flex items-center gap-3">
+                    <Avatar>
+                      <AvatarFallback className="bg-gradient-to-br from-blue-400 to-cyan-400 text-white">
+                        {t.name.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-medium text-black">{t.name}</p>
+                      <p className="text-sm text-neutral-500">{t.role}</p>
+                    </div>
                   </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
       </section>
 
       {/* How It Works */}
-      <section className="py-20 bg-neutral-50">
+      <section className="py-12 md:py-20 bg-neutral-50">
         <div className="max-w-4xl mx-auto px-6">
           <h2 className="text-3xl font-semibold text-black text-center mb-4">
             How it works
           </h2>
-          <p className="text-center text-neutral-500 mb-16">
+          <p className="text-center text-neutral-500 mb-8 md:mb-16">
             From resume to live website in 4 simple steps
           </p>
           <div className="relative">
-            {/* Dotted line connecting circles */}
+            {/* Dotted line connecting circles - desktop */}
             <div className="hidden md:block absolute top-8 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-blue-200 to-transparent" style={{ marginLeft: '15%', marginRight: '15%' }} />
 
-            <div className="grid md:grid-cols-4 gap-8 relative">
-              {[
-                { step: "1", title: "Link LinkedIn", desc: "Connect your profile", icon: "🔗" },
-                { step: "2", title: "Upload Resume", desc: "Drop your PDF", icon: "📄" },
-                { step: "3", title: "AI Magic", desc: "We create your site", icon: "✨" },
-                { step: "4", title: "Go Live!", desc: "Ready in minutes", icon: "🚀" },
-              ].map((item, i) => (
+            {/* Desktop layout */}
+            <div className="hidden md:grid md:grid-cols-4 gap-8 relative">
+              {steps.map((item, i) => (
                 <div
                   key={item.step}
                   className="text-center relative group"
@@ -245,9 +239,29 @@ export default function LandingPage() {
                   <div className="w-16 h-16 bg-white border-2 border-blue-100 text-2xl rounded-2xl flex items-center justify-center mx-auto mb-4 relative z-10 group-hover:border-blue-300 group-hover:shadow-lg group-hover:shadow-blue-50 transition-all duration-300 group-hover:-translate-y-1">
                     {item.icon}
                   </div>
+                  <Badge variant="secondary" className="mb-2 text-blue-600 bg-blue-50">
+                    Step {item.step}
+                  </Badge>
                   <h3 className="font-medium text-black mb-1">{item.title}</h3>
                   <p className="text-sm text-neutral-500">{item.desc}</p>
                 </div>
+              ))}
+            </div>
+
+            {/* Mobile layout */}
+            <div className="md:hidden grid grid-cols-2 gap-4">
+              {steps.map((item) => (
+                <Card key={item.step} className="border-blue-100">
+                  <CardContent className="p-4 text-center">
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-100 text-xl rounded-xl flex items-center justify-center mx-auto mb-2">
+                      {item.icon}
+                    </div>
+                    <Badge variant="secondary" className="mb-1 text-blue-600 bg-blue-50 text-xs">
+                      Step {item.step}
+                    </Badge>
+                    <h3 className="font-medium text-black text-sm">{item.title}</h3>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           </div>
@@ -264,7 +278,7 @@ export default function LandingPage() {
 
         <div className="max-w-3xl mx-auto px-6 text-center relative">
           <p className="text-sm uppercase tracking-wider text-neutral-400 mb-4">
-            Not made by humans
+            Not made by <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent font-semibold">Humans</span>
           </p>
           <h2 className="text-3xl md:text-4xl font-semibold mb-6">
             Created by <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">AI</span>
@@ -285,47 +299,60 @@ export default function LandingPage() {
             No hidden fees. No subscriptions.
           </p>
           <div className="grid md:grid-cols-2 gap-8">
-            <div className="border-2 border-neutral-200 rounded-2xl p-8 hover:border-blue-200 hover:shadow-xl hover:shadow-blue-50 transition-all duration-300">
-              <div className="inline-block px-3 py-1 bg-gradient-to-r from-blue-100 to-cyan-100 text-blue-700 text-xs font-medium rounded-full mb-4">
-                MOST POPULAR
-              </div>
-              <p className="text-sm text-neutral-500 uppercase tracking-wider mb-2">Personal Portfolio</p>
-              <div className="flex items-baseline gap-1 mb-6">
-                <span className="text-5xl font-semibold text-black">₹999</span>
-                <span className="text-neutral-500">one-time</span>
-              </div>
-              <ul className="space-y-4 mb-8">
-                {[
-                  "AI-generated portfolio",
-                  "Mobile responsive",
-                  "Contact form included",
-                  "Hosted for 1 year",
-                ].map((item, i) => (
-                  <li key={i} className="flex items-center gap-3 text-neutral-600">
-                    <span className="w-5 h-5 rounded-full bg-gradient-to-r from-blue-100 to-cyan-100 flex items-center justify-center text-blue-600 text-xs">✓</span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <button
-                onClick={handleCTA}
-                className="group w-full py-4 bg-black text-white font-medium rounded-xl hover:bg-neutral-800 transition-all duration-300 inline-flex items-center justify-center gap-2"
-              >
-                Get Started
-                <span className="group-hover:translate-x-1 transition-transform duration-300">→</span>
-              </button>
-            </div>
-            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl p-8 flex flex-col justify-center">
-              <h3 className="text-xl font-semibold text-black mb-4">
-                Don't pay till you see your stunning website
-              </h3>
-              <p className="text-neutral-600 leading-relaxed mb-4">
-                99.9% of our customers love their website at first sight. We are sure you will love your website too.
-              </p>
-              <p className="text-neutral-600 leading-relaxed">
-                That's why we create your website first. <span className="font-medium bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">Pay only if you love it.</span>
-              </p>
-            </div>
+            <Card className="hover:border-blue-200 hover:shadow-xl hover:shadow-blue-50 transition-all duration-300">
+              <CardContent className="p-8">
+                <div className="flex gap-2 mb-4">
+                  <Badge className="bg-gradient-to-r from-blue-100 to-cyan-100 text-blue-700 hover:from-blue-100 hover:to-cyan-100">
+                    MOST POPULAR
+                  </Badge>
+                  <Badge variant="destructive" className="bg-gradient-to-r from-red-100 to-orange-100 text-red-600 hover:from-red-100 hover:to-orange-100">
+                    50% OFF
+                  </Badge>
+                </div>
+                <p className="text-sm text-neutral-500 uppercase tracking-wider mb-2">Personal Portfolio</p>
+                <div className="mb-6">
+                  <div className="flex items-baseline gap-2 flex-wrap">
+                    <span className="text-5xl font-semibold text-black">₹999</span>
+                    <span className="text-xl text-neutral-400 line-through">₹1999</span>
+                  </div>
+                  <Badge variant="secondary" className="mt-2">
+                    one-time payment
+                  </Badge>
+                </div>
+                <ul className="space-y-4 mb-8">
+                  {[
+                    "AI-generated portfolio",
+                    "Mobile responsive",
+                    "Contact form included",
+                    "Hosted for 1 year",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-center gap-3 text-neutral-600">
+                      <span className="w-5 h-5 rounded-full bg-gradient-to-r from-blue-100 to-cyan-100 flex items-center justify-center text-blue-600">
+                        <Check className="w-3 h-3" />
+                      </span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <Button onClick={handleCTA} className="w-full group" size="lg">
+                  Get Started
+                  <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </CardContent>
+            </Card>
+            <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 border-0">
+              <CardContent className="p-8 flex flex-col justify-center h-full">
+                <h3 className="text-xl font-semibold text-black mb-4">
+                  Don't pay till you see your stunning website
+                </h3>
+                <p className="text-neutral-600 leading-relaxed mb-4">
+                  99.9% of our customers love their website at first sight. We are sure you will love your website too.
+                </p>
+                <p className="text-neutral-600 leading-relaxed">
+                  That's why we create your website first. <span className="font-medium bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">Pay only if you love it.</span>
+                </p>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
@@ -341,18 +368,20 @@ export default function LandingPage() {
           </p>
           <div className="grid md:grid-cols-2 gap-6">
             {privacyItems.map((item, i) => (
-              <div
+              <Card
                 key={i}
-                className="bg-white p-6 rounded-xl border border-neutral-200 flex gap-4 hover:border-blue-200 hover:shadow-lg hover:shadow-blue-50 transition-all duration-300 group hover:-translate-y-1"
+                className="hover:border-blue-200 hover:shadow-lg hover:shadow-blue-50 transition-all duration-300 hover:-translate-y-1"
               >
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl flex items-center justify-center flex-shrink-0 text-blue-600 group-hover:from-blue-100 group-hover:to-cyan-100 transition-colors duration-300">
-                  {item.icon}
-                </div>
-                <div>
-                  <h3 className="font-medium text-black mb-1">{item.title}</h3>
-                  <p className="text-sm text-neutral-600">{item.desc}</p>
-                </div>
-              </div>
+                <CardContent className="p-6 flex gap-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl flex items-center justify-center flex-shrink-0 text-blue-600">
+                    {item.icon}
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-black mb-1">{item.title}</h3>
+                    <p className="text-sm text-neutral-600">{item.desc}</p>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
@@ -367,29 +396,22 @@ export default function LandingPage() {
           <p className="text-center text-neutral-500 mb-12">
             Everything you need to know
           </p>
-          <div className="space-y-4">
+          <Accordion type="single" collapsible className="space-y-4">
             {faqs.map((faq, i) => (
-              <div
+              <AccordionItem
                 key={i}
-                className="border border-neutral-200 rounded-xl overflow-hidden hover:border-blue-200 transition-colors duration-300"
+                value={`item-${i}`}
+                className="border rounded-xl px-6 data-[state=open]:border-blue-200 data-[state=open]:shadow-lg data-[state=open]:shadow-blue-50 hover:border-blue-200 transition-all"
               >
-                <button
-                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-neutral-50 transition-colors duration-300"
-                >
-                  <span className="font-medium text-black">{faq.q}</span>
-                  <span className={`w-6 h-6 rounded-full flex items-center justify-center text-blue-600 bg-gradient-to-r from-blue-50 to-cyan-50 transition-transform duration-300 ${openFaq === i ? 'rotate-45' : ''}`}>
-                    +
-                  </span>
-                </button>
-                <div className={`overflow-hidden transition-all duration-300 ${openFaq === i ? 'max-h-40' : 'max-h-0'}`}>
-                  <div className="px-6 pb-5">
-                    <p className="text-neutral-600">{faq.a}</p>
-                  </div>
-                </div>
-              </div>
+                <AccordionTrigger className="text-left font-medium text-black hover:no-underline py-5">
+                  {faq.q}
+                </AccordionTrigger>
+                <AccordionContent className="text-neutral-600 pb-5">
+                  {faq.a}
+                </AccordionContent>
+              </AccordionItem>
             ))}
-          </div>
+          </Accordion>
         </div>
       </section>
 
@@ -407,24 +429,14 @@ export default function LandingPage() {
           <p className="text-neutral-400 mb-8">
             Join 10,000+ professionals with stunning portfolio websites.
           </p>
-          <button
-            onClick={handleCTA}
-            className="group px-8 py-4 bg-white text-black font-medium rounded-xl hover:bg-neutral-100 transition-all duration-300 inline-flex items-center gap-2 hover:shadow-xl hover:-translate-y-0.5"
-          >
+          <Button onClick={handleCTA} size="lg" variant="secondary" className="group">
             Build your own Portfolio
-            <span className="group-hover:translate-x-1 transition-transform duration-300">→</span>
-          </button>
+            <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          </Button>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-neutral-100 py-8 bg-white">
-        <div className="max-w-6xl mx-auto px-6 text-center">
-          <p className="text-sm text-neutral-500">
-            © VibeLabs Inc. All rights reserved.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }
