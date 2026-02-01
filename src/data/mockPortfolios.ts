@@ -174,7 +174,6 @@ export const FINANCE_PORTFOLIO: PortfolioData = {
   meta: {
     name: 'Jonathan Sterling',
     linkedin_url: 'https://linkedin.com/in/jonathansterling',
-    resume_url: '/resume-sterling.pdf'
   }
 }
 
@@ -352,7 +351,6 @@ export const DEVELOPER_PORTFOLIO: PortfolioData = {
   meta: {
     name: 'Alex Chen',
     linkedin_url: 'https://linkedin.com/in/alexchen',
-    resume_url: '/resume-chen.pdf'
   }
 }
 
@@ -530,7 +528,7 @@ export const PRODUCT_PORTFOLIO: PortfolioData = {
   meta: {
     name: 'Sidharth Suresh',
     linkedin_url: 'https://linkedin.com/in/sidharthsuresh',
-    resume_url: '/resume-sidharth.pdf'
+    resume_url: '/sidharth_resume.pdf',
   }
 }
 
@@ -708,7 +706,6 @@ export const DESIGNER_PORTFOLIO: PortfolioData = {
   meta: {
     name: 'Elena Martinez',
     linkedin_url: 'https://linkedin.com/in/elenamartinez',
-    resume_url: '/resume-martinez.pdf'
   }
 }
 

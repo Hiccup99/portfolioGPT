@@ -93,9 +93,21 @@ export default function Navbar({ designProfile, linkedinUrl, resumeUrl, name }: 
     }
   }
 
-  const openResume = () => {
+  const downloadResume = () => {
     if (resumeUrl) {
-      window.open(resumeUrl, '_blank', 'noopener,noreferrer')
+      // Handle both data URLs and regular URLs
+      if (resumeUrl.startsWith('data:')) {
+        // Create a download link for data URL
+        const link = document.createElement('a')
+        link.href = resumeUrl
+        link.download = `${name || 'resume'}.pdf`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+      } else {
+        // Regular URL - open in new tab
+        window.open(resumeUrl, '_blank', 'noopener,noreferrer')
+      }
     }
   }
 
@@ -118,7 +130,7 @@ export default function Navbar({ designProfile, linkedinUrl, resumeUrl, name }: 
       id: 'resume',
       label: 'Resume',
       icon: FileText,
-      onClick: openResume,
+      onClick: downloadResume,
       show: !!resumeUrl,
     },
     {

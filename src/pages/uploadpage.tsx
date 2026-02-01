@@ -54,6 +54,7 @@ export default function UploadPage() {
       setLinkedinProfilePicture(mockData.profile_photo)
       setLinkedinStatus('success')
       setLinkedinUrl(`(mock: ${profileKey})`)
+      setLinkedinName(mockData.fullName)
     }
   }, [])
 
@@ -65,6 +66,7 @@ export default function UploadPage() {
   const [linkedinStatus, setLinkedinStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [linkedinText, setLinkedinText] = useState('')
   const [linkedinProfilePicture, setLinkedinProfilePicture] = useState<string | null>(null)
+  const [linkedinName, setLinkedinName] = useState<string | null>(null)
 
   const [isLoading, setIsLoading] = useState(false)
 
@@ -128,6 +130,7 @@ export default function UploadPage() {
       console.log('LinkedIn text generated:', text.substring(0, 200) + '...')
       setLinkedinText(text)
       setLinkedinProfilePicture(profile.profile_picture_url || null)
+      setLinkedinName(profile.name || null)
       setLinkedinStatus('success')
       toast.success('LinkedIn profile fetched successfully')
     } catch (err) {
@@ -136,6 +139,16 @@ export default function UploadPage() {
       toast.error(err instanceof Error ? err.message : 'Failed to fetch LinkedIn profile')
     }
   }, [linkedinUrl])
+
+  // Convert file to base64 data URL for storage
+  const fileToDataUrl = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => resolve(reader.result as string)
+      reader.onerror = reject
+      reader.readAsDataURL(file)
+    })
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -147,6 +160,38 @@ export default function UploadPage() {
         linkedinText,
         profileImageUrl: linkedinProfilePicture,
       })
+
+      // Add meta information for navbar links
+      // Create resume data URL if file exists
+      let resumeDataUrl: string | undefined
+      if (resumeFile) {
+        resumeDataUrl = await fileToDataUrl(resumeFile)
+      }
+
+      // Extract clean LinkedIn URL (handle both real URLs and mock mode)
+      let cleanLinkedinUrl: string | undefined
+      if (linkedinUrl && !linkedinUrl.startsWith('(mock:')) {
+        cleanLinkedinUrl = linkedinUrl.trim()
+      }
+
+      // Use LinkedIn name if available, otherwise try to extract from generated content
+      let extractedName: string | undefined = linkedinName || undefined
+      if (!extractedName) {
+        const headline = portfolioData.introduction?.content?.headline || ''
+        // Try to extract name from headline patterns like "I'm [Name]" or "Hi, I'm [Name]"
+        const nameMatch = headline.match(/(?:I'm|I am|Hi,?\s*I'm)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i)
+        if (nameMatch) {
+          extractedName = nameMatch[1]
+        }
+      }
+
+      // Add meta to portfolio data
+      portfolioData.meta = {
+        ...portfolioData.meta,
+        name: extractedName,
+        resume_url: resumeDataUrl,
+        linkedin_url: cleanLinkedinUrl,
+      }
 
       sessionStorage.setItem('portfolioData', JSON.stringify(portfolioData))
       navigate('/portfolio')
